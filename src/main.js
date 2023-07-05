@@ -8,22 +8,6 @@ const getProperty = (key) => {
   return PropertiesService.getScriptProperties().getProperty(key);
 }
 
-const getSourceCalendar = () => {
-  // 同期先のカレンダーと、同期元のカレンダーの一覧を取得
-  const calendarList = CalendarApp.getAllCalendars();
-  // @import.calendar.google.com のものが対象
-  const srcCalendarList = calendarList.filter(calendar => calendar.getId().endsWith('@import.calendar.google.com'));
-  return srcCalendarList;
-}
-
-const namingEvents = (calendar, dateFrom, dateUntil) => {
-  // カレンダーからイベントを辞書形式で取得する
-  let eventList = calendar.getEvents(dateFrom, dateUntil);
-  return eventList.reduce((res, event) => {
-    res[event.getId()] = event;
-    return res;
-  }, {});
-}
 
 const syncCalendar = () => {
   // カレンダーの取得
@@ -73,7 +57,7 @@ const syncCalendar = () => {
     // TODO: Error Handling
     value = value.substring(SYNC_DESC.length, value.length);
     let srcCalendarId = value.split('/')[0];
-    let srcEventId = value.split('/')[1];
+    let srcEventId = value.split('/')[1] + '/' + value.split('/')[2];
     Logger.log('fetched src: ' + srcCalendarId + ':' + srcEventId + ', target: ' + tgtEventId);
     // 存在判定: カレンダー自体と、その中のイベントが存在すること
     if (
@@ -109,7 +93,7 @@ const syncCalendar = () => {
           srcEvent,
           tgtCalendar
         );
-        Logger.log('created event: ' + newEvent.getId() + ' from ' + srcEvent.getId());
+        Logger.log('created event: ' + eventUqId(newEvent) + ' from ' + eventUqId(srcEvent));
         res2 += 1;
       }
       return res2;
